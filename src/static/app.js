@@ -10,8 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch("/activities");
       const activities = await response.json();
 
-      // Clear loading message
+      // Clear loading message and existing options
       activitiesList.innerHTML = "";
+      activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
@@ -27,6 +28,34 @@ document.addEventListener("DOMContentLoaded", () => {
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
         `;
 
+        // Create participants section
+        const participantsSection = document.createElement("div");
+        participantsSection.className = "participants";
+
+        const header = document.createElement("h5");
+        header.textContent = "Participants:";
+        participantsSection.appendChild(header);
+
+        if (details.participants && details.participants.length > 0) {
+          const ul = document.createElement("ul");
+          ul.className = "participants-list";
+
+          details.participants.forEach((p) => {
+            const li = document.createElement("li");
+            li.className = "participant-item";
+            li.textContent = p;
+            ul.appendChild(li);
+          });
+
+          participantsSection.appendChild(ul);
+        } else {
+          const emptyP = document.createElement("p");
+          emptyP.className = "participant-empty";
+          emptyP.textContent = "Be the first to sign up!";
+          participantsSection.appendChild(emptyP);
+        }
+
+        activityCard.appendChild(participantsSection);
         activitiesList.appendChild(activityCard);
 
         // Add option to select dropdown
@@ -62,6 +91,9 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+
+        // Refresh activities so the participants list and availability update
+        fetchActivities();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
